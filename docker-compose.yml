@@ -1,0 +1,57 @@
+services:
+  worker:
+    build:
+      context: .
+      dockerfile: src/DataCollector.Worker/Dockerfile
+    ports:
+      - "5001:5001"
+    volumes:
+      - db-data:/data
+    environment:
+      - ConnectionStrings__DefaultConnection=Data Source=/data/crypto.db
+      - Scraper__TargetUrl=https://api.coingecko.com/api/v3
+      - Scraper__IntervalMinutes=5
+      - ASPNETCORE_URLS=http://+:5001
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5001/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  api:
+    build:
+      context: .
+      dockerfile: src/DataCollector.Api/Dockerfile
+    ports:
+      - "8080:8080"
+    volumes:
+      - db-data:/data
+    environment:
+      - ConnectionStrings__DefaultConnection=Data Source=/data/crypto.db
+      - ASPNETCORE_URLS=http://+:8080
+    depends_on:
+      worker:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  web:
+    build:
+      context: ./datacollector-web
+      dockerfile: Dockerfile
+    ports:
+      - "4200:80"
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  db-data:

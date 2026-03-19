@@ -1,0 +1,99 @@
+<div class="min-h-screen bg-gray-900 text-white">
+
+  <!-- Header -->
+  <header class="border-b border-gray-700 px-6 py-4 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <span class="text-2xl">📈</span>
+      <div>
+        <h1 class="text-xl font-bold text-white">CryptoTracker</h1>
+        <p class="text-gray-400 text-xs">Top 50 criptomoedas por Market Cap</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-4 text-sm text-gray-400">
+      <span *ngIf="lastUpdated">Atualizado às {{ lastUpdated }}</span>
+      <span class="flex items-center gap-1">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse inline-block"></span>
+        Ao vivo · atualiza a cada 30s
+      </span>
+      <button
+        (click)="triggerScrape()"
+        [disabled]="triggering"
+        class="flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium transition-colors"
+      >
+        <span *ngIf="triggering" class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin inline-block"></span>
+        <span *ngIf="!triggering">⚡</span>
+        {{ triggering ? 'Coletando...' : 'Atualizar Agora' }}
+      </button>
+    </div>
+  </header>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="flex items-center justify-center h-96 text-gray-400">
+    <div class="text-center">
+      <div class="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+      <p>Carregando dados...</p>
+    </div>
+  </div>
+
+  <main *ngIf="!loading" class="px-6 py-6 max-w-screen-xl mx-auto space-y-6">
+
+    <!-- Stat Cards -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <app-stat-card
+        label="Total de Registros"
+        [value]="totalRecords"
+        sub="snapshots no banco">
+      </app-stat-card>
+      <app-stat-card
+        label="Última Coleta"
+        [value]="lastCollected"
+        sub="horário da API">
+      </app-stat-card>
+      <app-stat-card
+        label="Em Alta (24h)"
+        [value]="positiveCount.toString()"
+        sub="moedas positivas">
+      </app-stat-card>
+      <app-stat-card
+        label="Em Baixa (24h)"
+        [value]="negativeCount.toString()"
+        sub="moedas negativas">
+      </app-stat-card>
+    </div>
+
+    <!-- Top Gainers / Losers -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <app-movers-list
+        title="Top Gainers"
+        icon="🚀"
+        [coins]="gainers">
+      </app-movers-list>
+      <app-movers-list
+        title="Top Losers"
+        icon="📉"
+        [coins]="losers">
+      </app-movers-list>
+    </div>
+
+    <!-- Price Chart -->
+    <app-price-chart
+      *ngIf="selectedCoin"
+      [history]="selectedHistory"
+      [symbol]="selectedCoin.symbol">
+    </app-price-chart>
+
+    <!-- Coin Table -->
+    <div>
+      <h2 class="text-lg font-semibold text-white mb-3">
+        Mercado
+        <span class="text-gray-400 text-sm font-normal ml-2">clique em "Ver" para ver o histórico</span>
+      </h2>
+      <app-coin-table
+        [coins]="coins"
+        [selected]="selectedCoin"
+        (selectCoin)="onSelectCoin($event)">
+      </app-coin-table>
+    </div>
+
+  </main>
+</div>
