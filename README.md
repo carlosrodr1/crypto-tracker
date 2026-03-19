@@ -41,7 +41,7 @@ Sistema de coleta e visualização de cotações de criptomoedas em tempo real. 
 ## Como rodar
 
 ```bash
-git clone <url-do-repositorio>
+git clone https://github.com/carlosrodr1/crypto-tracker.git
 cd DataCollector
 
 docker compose up --build
